@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1](https://github.com/KazuProg/github-flow-test/compare/v0.4.0...v0.4.1) (2026-07-04)
+
+### Code Refactoring
+
+* move Python example from python-example/ to repo root ([d593a76](https://github.com/KazuProg/github-flow-test/commit/d593a76413252b867af7aeb24ce55a6b40d6aeee))
+
+### Chores
+
+* **release:** python-v0.1.0 [skip ci] ([7782dc3](https://github.com/KazuProg/github-flow-test/commit/7782dc3a4fd99dff0bf498e06d71dfcaadd62d9e))
+
 ## [0.4.0](https://github.com/KazuProg/github-flow-test/compare/v0.3.3...v0.4.0) (2026-07-04)
 
 ### Features
