@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.2.1](https://github.com/KazuProg/github-flow-test/compare/v0.2.0...v0.2.1) (2026-07-04)
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
@@ -15,4 +17,3 @@ Version numbers follow a simplified subset of [Semantic Versioning](https://semv
 ### Documentation
 
 - link CONTRIBUTING.md from README (#1)
-
