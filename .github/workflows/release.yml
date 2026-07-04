@@ -1,8 +1,7 @@
 name: Release
 
 on:
-  pull_request:
-    types: [closed]
+  push:
     branches: [main]
 
 concurrency:
@@ -10,50 +9,33 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   release:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
     steps:
-      - name: Checkout main
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: main
-          fetch-depth: 1
+          fetch-depth: 0
 
-      - name: Compute release plan
-        id: plan
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPO: ${{ github.repository }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_EXPECTED_COMMITS: ${{ github.event.pull_request.commits }}
-        run: node .github/scripts/release.mjs plan
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
 
-      - name: Update VERSION and CHANGELOG.md
-        env:
-          NEXT_VERSION: ${{ steps.plan.outputs.next_version }}
-        run: node .github/scripts/release.mjs write
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Commit and push to main
-        env:
-          NEXT_VERSION: ${{ steps.plan.outputs.next_version }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add VERSION CHANGELOG.md
-          git commit -m "chore(release): v${NEXT_VERSION}"
-          git push origin HEAD:main
+      - name: Verify the integrity of provenance attestations and registry signatures
+        run: npm audit signatures
 
-      - name: Create tag and GitHub Release
+      - name: Release
         env:
-          GH_TOKEN: ${{ github.token }}
-          NEXT_VERSION: ${{ steps.plan.outputs.next_version }}
-        run: |
-          RELEASE_SHA=$(git rev-parse HEAD)
-          gh release create "v${NEXT_VERSION}" \
-            --target "$RELEASE_SHA" \
-            --title "v${NEXT_VERSION}" \
-            --notes-file "$RUNNER_TEMP/changelog-fragment.md"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
