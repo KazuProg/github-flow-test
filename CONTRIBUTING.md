@@ -10,6 +10,8 @@
 
 rebase-merge では PR 内の各コミットがそのまま `main` の履歴に残り、**個々のコミットメッセージ**がバージョン判定と CHANGELOG 生成の入力になる(PR タイトルではない)。[Conventional Commits](https://www.conventionalcommits.org/) 形式で書くこと。
 
+PR の作成・更新時に `.github/workflows/lint-commits.yml` が [commitlint](https://commitlint.js.org/) で各コミットの形式を自動チェックする。
+
 ```
 <type>(<scope>): <subject>
 ```
