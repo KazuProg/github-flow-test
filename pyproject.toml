@@ -1,6 +1,6 @@
 [project]
 name = "python-example"
-version = "0.1.0"
+version = "0.1.1"
 description = "Python版の自動リリース検証用サンプル(GitHub Flow + python-semantic-release)"
 requires-python = ">=3.13"
 
