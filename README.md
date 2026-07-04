@@ -4,4 +4,4 @@
 
 GitHub Flow + Conventional Commits ベースの自動リリース検証用リポジトリ。
 
-コミットメッセージ規約は [CONTRIBUTING.md](CONTRIBUTING.md) を参照。
+コミットメッセージ規約は [CONTRIBUTING.md](CONTRIBUTING.md) を参照(commitlintで自動チェックされる)。
