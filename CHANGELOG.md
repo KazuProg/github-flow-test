@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.0](https://github.com/KazuProg/github-flow-test/compare/v0.2.2...v0.3.0) (2026-07-04)
+
+### Features
+
+* add release workflow status badge to README ([9e40d8f](https://github.com/KazuProg/github-flow-test/commit/9e40d8f38aa5f8643fadd21b93213e6afddfeafe))
+
 ## [0.2.2](https://github.com/KazuProg/github-flow-test/compare/v0.2.1...v0.2.2) (2026-07-04)
 
 ### Bug Fixes
