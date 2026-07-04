@@ -18,4 +18,4 @@ patch_tags = ["fix", "perf", "revert", "refactor", "docs", "style", "test", "bui
 allowed_tags = ["feat", "fix", "perf", "revert", "refactor", "docs", "style", "test", "build", "ci", "chore"]
 
 [tool.semantic_release.changelog.default_templates]
-changelog_file = "CHANGELOG.md"
+changelog_file = "CHANGELOG-python.md"
