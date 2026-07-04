@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2](https://github.com/KazuProg/github-flow-test/compare/v0.3.1...v0.3.2) (2026-07-04)
+
+### Continuous Integration
+
+* skip release workflow for CI-only file changes ([09037d9](https://github.com/KazuProg/github-flow-test/commit/09037d9f544233b3b13621cc86e03f0c7aaeeca1))
+
+### Chores
+
+* pin CHANGELOG preamble as part of changelogTitle ([4727ab3](https://github.com/KazuProg/github-flow-test/commit/4727ab3f7e22949f63e7396f1fc0eb17b64e17d5))
+
 ## [0.3.1](https://github.com/KazuProg/github-flow-test/compare/v0.3.0...v0.3.1) (2026-07-04)
 
 ### Chores
