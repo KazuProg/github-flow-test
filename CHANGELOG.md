@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.1](https://github.com/KazuProg/github-flow-test/compare/v0.3.0...v0.3.1) (2026-07-04)
+
+### Chores
+
+* ignore log files ([3140f48](https://github.com/KazuProg/github-flow-test/commit/3140f48ab714503d6c6763a5af4c38c293c70830))
+
 ## [0.3.0](https://github.com/KazuProg/github-flow-test/compare/v0.2.2...v0.3.0) (2026-07-04)
 
 ### Features
