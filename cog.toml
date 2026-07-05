@@ -1,0 +1,86 @@
+# cocogitto configuration
+# Node (package.json) と Python (pyproject.toml) を同一コミット履歴で同期バンプする。
+# モノレポ機能 ([monorepo.packages.*]) は使わない: 依存関係リゾルバーが
+# Cargo/Maven/Npm のみで Python 未対応であり、「repo root の2ファイルを常に
+# 同じバージョンにしたいだけ」の今回の用途には過剰設計(YAGNI)。
+# 通常のトップレベル pre_bump_hooks/post_bump_hooks で両ファイルを書き換える。
+
+tag_prefix = "v"
+branch_whitelist = ["main"]
+skip_ci = "[skip ci]"
+
+pre_bump_hooks = [
+  "npm version {{version}} --no-git-tag-version --allow-same-version",
+  "sed -i 's/^version = \".*\"$/version = \"{{version}}\"/' pyproject.toml",
+]
+
+post_bump_hooks = [
+  "git push",
+  "git push origin {{version_tag}}",
+]
+
+[changelog]
+path = "CHANGELOG.md"
+template = "remote"
+remote = "github.com"
+owner = "KazuProg"
+repository = "github-flow-test"
+
+# CONTRIBUTING.md の type 一覧テーブルと 1:1 対応させる。
+# feat/fix はcocogittoの組み込みデフォルトと実質一致するが、対応を明示するため書く。
+# それ以外はbump_patchを明示しないとデフォルトfalseのまま(catch-allルールが無いため)。
+
+[commit_types.feat]
+changelog_title = "Features"
+bump_minor = true
+order = 1
+
+[commit_types.fix]
+changelog_title = "Bug Fixes"
+bump_patch = true
+order = 2
+
+[commit_types.perf]
+changelog_title = "Performance Improvements"
+bump_patch = true
+order = 3
+
+[commit_types.revert]
+changelog_title = "Reverts"
+bump_patch = true
+order = 4
+
+[commit_types.refactor]
+changelog_title = "Code Refactoring"
+bump_patch = true
+order = 5
+
+[commit_types.docs]
+changelog_title = "Documentation"
+bump_patch = true
+order = 6
+
+[commit_types.style]
+changelog_title = "Styles"
+bump_patch = true
+order = 7
+
+[commit_types.test]
+changelog_title = "Tests"
+bump_patch = true
+order = 8
+
+[commit_types.build]
+changelog_title = "Build System"
+bump_patch = true
+order = 9
+
+[commit_types.ci]
+changelog_title = "Continuous Integration"
+bump_patch = true
+order = 10
+
+[commit_types.chore]
+changelog_title = "Chores"
+bump_patch = true
+order = 11

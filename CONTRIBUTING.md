@@ -4,7 +4,7 @@
 
 - `main` に向けて開発ブランチ(`feature/*`, `fix/*`, `chore/*` など)から PR を作成する
 - PR は **Rebase and merge** で `main` に統合する
-- マージされて `main` に push されると、`.github/workflows/release.yml` が [semantic-release](https://semantic-release.gitbook.io/semantic-release/) を実行し、バージョン bump・`CHANGELOG.md` 更新・`package.json` の version 更新・タグ作成・GitHub Release 作成を自動で行う
+- マージされて `main` に push されると、`.github/workflows/release.yml` が [cocogitto](https://docs.cocogitto.io/) を実行し、バージョン bump・`CHANGELOG.md` 更新・`package.json`/`pyproject.toml` の version 更新・タグ作成・GitHub Release 作成を自動で行う
 
 ## コミットメッセージ規約
 
@@ -38,53 +38,48 @@ PR の作成・更新時に `.github/workflows/lint-commits.yml` が [commitlint
 
 - コミットの本文/フッターに `BREAKING CHANGE:` があるか、`type!:` のように `!` が付いていれば **major** バージョンアップ
 - そうでないコミットに `feat:` が1つでもあれば **minor** バージョンアップ
-- どちらでもなければ(`fix`/`chore`/`refactor` 等のみ、規約に沿わないコミットのみの場合も含む)**必ず patch** バージョンアップ
+- どちらでもなければ(`fix`/`chore`/`refactor` 等のみの場合も含む)**必ず patch** バージョンアップ
 
-この挙動は `.releaserc.json` の `commit-analyzer` プラグインで次のように設定している。
+cocogitto は標準設定では `fix`/`feat`/`BREAKING CHANGE` の3つしかバージョンに影響させず、`docs`/`chore`/`refactor` 等では何もバージョンを上げない。「該当typeが無ければ常にpatch」というcatch-allルールが無いため、`cog.toml` の `[commit_types.<type>]` で **9種類全てに `bump_patch = true` を明示** している。
 
-```json
-[
-  "@semantic-release/commit-analyzer",
-  {
-    "preset": "conventionalcommits",
-    "releaseRules": [
-      { "breaking": true, "release": "major" },
-      { "type": "feat", "release": "minor" },
-      { "release": "patch" }
-    ]
-  }
-]
+```toml
+[commit_types.fix]
+bump_patch = true
+
+[commit_types.chore]
+bump_patch = true
+
+# ... 他 perf/revert/refactor/docs/style/test/build/ci も同様
 ```
 
-`preset: "conventionalcommits"` の指定が必須点に注意。デフォルトの Angular preset のパーサーは `type!: subject` の `!` 記法を認識できず(`headerPattern` に `!` を許容する構文が無い)、`BREAKING CHANGE:` フッターのみ検知できる状態になってしまう。
-
-3番目のルール(`type` を指定しない = 常にマッチする)により、規約に沿わないコミットも含め、どのコミットにも独自ルールが必ず1つ以上マッチする。`@semantic-release/commit-analyzer` は複数のルールがマッチした場合、最も高いリリースレベル(major > minor > patch)を採用する。
+なお cocogitto は「現在のバージョンが `0.x` の間は BREAKING CHANGE があっても major へ上げない」という SemVer の初期開発規約をハードコードしており、設定で無効化できない。このリポジトリは `1.0.0` 以降で運用しているため、この制約には該当しない。
 
 ### 規約に沿わないコミット
 
-Conventional Commits 形式に従っていないコミットメッセージは、`CHANGELOG.md` の本文には掲載されない。ただし上記 `releaseRules` の万能マッチにより、バージョンの patch アップ自体は発生する。リリースノートの可読性のため規約に沿った記述を推奨する。
+Conventional Commits 形式としてパースできないコミットは、cocogitto によって**静的に無視される**(CHANGELOG に載らないだけでなく、バージョンにも一切影響しない)。PR時点で `.github/workflows/lint-commits.yml` の commitlint が形式を強制しているため、main にマージされた時点で規約違反のコミットが混入するリスクは低い。
 
 ### 心がけること
 
 - 1コミット1トピックにする(各コミットがそのまま CHANGELOG の1行になるため)
 - `chore`/`docs` のみの PR でも patch リリースが自動発行される
 
-## CHANGELOG.md の説明文
+## CHANGELOG.md のマーカー
 
-`CHANGELOG.md` 冒頭のタイトル + 説明文(`# Changelog` から始まる段落)は、`.releaserc.json` の `@semantic-release/changelog` 設定にある `changelogTitle` と完全一致させる必要がある。
+`CHANGELOG.md` には `- - -` という文字列単独の行(cocogitto の区切りマーカー)が必要。cocogitto はこのマーカーを探し、その直後に新しいリリースエントリを挿入する。マーカーが無いと `cog bump` 自体が失敗する。
 
-`@semantic-release/changelog` は `changelogTitle` と完全一致する先頭部分だけをタイトルとして固定し、新しいリリースエントリをその直後に挿入する。一致しない場合、既存の説明文は「タイトル」として認識されず、新しいリリースエントリの下に押し出されてしまう。
+タイトル・説明文を変更する場合も、このマーカー行より前に置く限り自由に編集してよい(マーカー自体は削除しないこと)。
 
-冒頭の文言を変更する場合は、`CHANGELOG.md` と `.releaserc.json` の `changelogTitle` を必ず同時に更新すること。
+## Node/Python の同期バージョニング
 
-## Python版(`pyproject.toml`)
+`package.json`(Node)と `pyproject.toml`(Python)は**同じコミット履歴を見て同期してバージョンアップする**(`feat:` があれば両方 minor、`BREAKING CHANGE`/`!` があれば両方 major、それ以外は両方 patch)。タグ・CHANGELOG も Node/Python 共通で単一(`v{version}` タグ、`CHANGELOG.md` 一本)。
 
-リポジトリルートの `pyproject.toml` は同じ運用を [python-semantic-release](https://python-semantic-release.readthedocs.io/) で再現した例。`main` への push で `.github/workflows/release.yml` の `release-python` job(`release-node` の後に実行)が動作する。
+`cog.toml` の `pre_bump_hooks` で両方のマニフェストを1つのバージョンに書き換えている。
 
-- バージョンは `pyproject.toml` の `project.version` に記録
-- タグは `python-v${version}` 形式(Node側の `v${version}` とは独立して追跡される)
-- CHANGELOG は `CHANGELOG-python.md`(Node側の `CHANGELOG.md` とファイル名を分離)。`<!-- version list -->` コメントが新エントリの挿入位置マーカーになっており、削除すると更新されなくなる
+```toml
+pre_bump_hooks = [
+  "npm version {{version}} --no-git-tag-version --allow-same-version",
+  "sed -i 's/^version = \".*\"$/version = \"{{version}}\"/' pyproject.toml",
+]
+```
 
-**Node側・Python側は同じコミット履歴を見て同期してバージョンアップする**(`feat:` があれば両方 minor、`BREAKING CHANGE`/`!` があれば両方 major、それ以外は両方 patch)。Node用・Python用の変更を区別せず、リポジトリ全体のコミットで判定される。これは「両方の構成を見比べる」という検証目的に合わせた意図的な設計であり、将来Python側の変更だけを対象にしたい場合は `commit_parser = "conventional-monorepo"` と `path_filters` で独立させる拡張余地がある。
-
-python-semantic-release は `BREAKING CHANGE`/`!` の検知を無効化する設定を持たないため、Node側のような「majorへ絶対に上がらない」仕組みは再現できない(そのため今回はNode側もmajorを有効化して合わせている)。
+Node用・Python用の変更を区別せず、リポジトリ全体のコミットで判定される。これは「両方の構成を見比べる」という検証目的に合わせた意図的な設計であり、将来Python側の変更だけを対象にしたい場合は cocogitto の `[monorepo.packages.*]` 機能で独立させる拡張余地がある(ただし依存関係リゾルバーは Cargo/Maven/Npm のみで Python 未対応)。
