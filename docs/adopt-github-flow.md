@@ -7,7 +7,7 @@
 ## 前提条件
 
 - GitHub でホストされたリポジトリで、`main`(または任意の1本)を唯一の長命ブランチとして運用できる
-- PR のマージ方式を **Rebase and merge** に統一できる。Squash/Merge commit だと個々のコミットメッセージがバージョン判定・CHANGELOG 生成の入力にならず、この設計の前提が崩れる
+- PR のマージ方式を **Rebase and merge** または **Merge commit** に統一できる(個々のコミットが `main` の履歴に残る方式であることが必須)。**Squash and merge** を使う場合は圧縮後のコミットメッセージ自体を Conventional Commits 形式にする必要がある(詳細は [CONTRIBUTING.md](../CONTRIBUTING.md) を参照)
 - ブランチ保護で Required status checks を設定できる権限がある
 
 ## コピーするファイル
@@ -76,7 +76,7 @@ pre_bump_hooks = [
 - catch-all のバンプルールが無い。型ごとに `bump_patch`/`bump_minor` を明示しない限りバージョンは上がらない
 - 現在のバージョンの major が `0` の間は `BREAKING CHANGE`/`!` があっても major bump されない(cocogitto にハードコードされており設定で無効化できない)。`1.0.0` から運用を始めるとこの制約を回避できる
 - `CHANGELOG.md` に `- - -` マーカー行が無いと `cog bump` 自体が失敗する
-- Rebase and merge では、PR の `head.sha` と `main` にマージされた後のコミット SHA が一致しない。release workflow を `pull_request: closed` でトリガーする場合、`actions/checkout` で明示的に `ref: main` を指定し、リリース有無の判定も `github.sha` ではなくワークフロー内で記録した pre-bump HEAD との比較で行う
+- マージ方式(Rebase and merge / Merge commit / Squash and merge のいずれでも)によらず、PR の `head.sha` と `main` にマージされた後のコミット SHA は一致しない。release workflow を `pull_request: closed` でトリガーする場合、`actions/checkout` で明示的に `ref: main` を指定し、リリース有無の判定も `github.sha` ではなくワークフロー内で記録した pre-bump HEAD との比較で行う
 - release workflow を `push: branches: [main]` トリガーにすると、cocogitto の bump commit 自身が同じ workflow を再トリガーする。これを防ぐために bump commit へ GitHub 標準の `[skip ci]` キーワードを付ける対処は別の問題を生む: `[skip ci]` はそのコミットに対する **全 workflow の check run** を抑制してしまう(特定の workflow だけを止められない)ため、「このコミットだけ CI をスキップしたい」と「必須ステータスチェックとして運用したい」が両立しなくなり、チェックが一度も report されないまま PR がブロックされ続ける。`pull_request: types: [closed]` + `github.event.pull_request.merged == true` ガードに切り替えれば、bump commit の `git push` はこのトリガー条件に一致しないため再トリガー自体が起きず、`[skip ci]` も不要になる
 - 外部 CD(デプロイ先のプラットフォーム等)を連携させる場合、`main` への push ではなく `release: published` イベントをトリガーにする。PR のマージコミットと cocogitto の bump commit は別々に `main` へ push されるため、push トリガーだと1回のリリースで2回デプロイが走る
 
