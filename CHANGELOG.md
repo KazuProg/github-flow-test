@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - - -
+## [v1.1.2](https://github.com/KazuProg/github-flow-test/compare/893a74ce7e0bf77a8bc1c1e3484939ab86fd59f7..v1.1.2) - 2026-07-05
+#### Continuous Integration
+- fetch commitlint via npx instead of package.json deps - ([893a74c](https://github.com/KazuProg/github-flow-test/commit/893a74ce7e0bf77a8bc1c1e3484939ab86fd59f7)) - KazuProg
+
+- - -
+
 ## [v1.1.1](https://github.com/KazuProg/github-flow-test/compare/403cf55cb53f42e017fb6532d8fe113c9b256b6a..v1.1.1) - 2026-07-05
 #### Chores
 - inline commitlint config into lint-commits.yml - ([403cf55](https://github.com/KazuProg/github-flow-test/commit/403cf55cb53f42e017fb6532d8fe113c9b256b6a)) - KazuProg
