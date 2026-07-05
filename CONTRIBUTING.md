@@ -4,7 +4,8 @@
 
 - `main` に向けて開発ブランチ(`feature/*`, `fix/*`, `chore/*` など)から PR を作成する
 - PR は **Rebase and merge** で `main` に統合する
-- マージされて `main` に push されると、`.github/workflows/release.yml` が [cocogitto](https://docs.cocogitto.io/) を実行し、バージョン bump・`CHANGELOG.md` 更新・`package.json`/`pyproject.toml` の version 更新・タグ作成・GitHub Release 作成を自動で行う
+- PR が `main` にマージされると、`.github/workflows/release.yml` が [cocogitto](https://docs.cocogitto.io/) を実行し、バージョン bump・`CHANGELOG.md` 更新・`package.json`/`pyproject.toml` の version 更新・タグ作成・GitHub Release 作成を自動で行う
+- リリースさせたくないPRには `no-release` ラベルを付けてマージする(ワークフロー自体は実行されるが、リリース処理だけがスキップされる)
 
 ## コミットメッセージ規約
 
