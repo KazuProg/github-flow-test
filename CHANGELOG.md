@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - - -
+## [v1.1.1](https://github.com/KazuProg/github-flow-test/compare/403cf55cb53f42e017fb6532d8fe113c9b256b6a..v1.1.1) - 2026-07-05
+#### Chores
+- inline commitlint config into lint-commits.yml - ([403cf55](https://github.com/KazuProg/github-flow-test/commit/403cf55cb53f42e017fb6532d8fe113c9b256b6a)) - KazuProg
+
+- - -
+
 ## [v1.1.0](https://github.com/KazuProg/github-flow-test/compare/cf5f08d2862bc53d1ce0e87893c31a1311262192..v1.1.0) - 2026-07-05
 #### Features
 - mention cocogitto as the release automation tool in README - ([cf5f08d](https://github.com/KazuProg/github-flow-test/commit/cf5f08d2862bc53d1ce0e87893c31a1311262192)) - KazuProg
