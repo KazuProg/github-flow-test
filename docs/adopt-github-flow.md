@@ -2,7 +2,7 @@
 
 このリポジトリで検証している「単一 `main` ブランチ + Conventional Commits + [cocogitto](https://docs.cocogitto.io/) による全自動リリース」の仕組みを、別リポジトリに導入する際の手順書。このリポジトリを渡された状態で作業する前提でまとめている。
 
-設計判断の詳細な理由は [CLAUDE.md](../CLAUDE.md) の Architecture 節、コミット規約・バージョン bump ルールの詳細は [CONTRIBUTING.md](../CONTRIBUTING.md) を参照。このガイドでは「導入時に何をすべきか」に絞る。
+コミット規約・バージョン bump ルールの詳細は [CONTRIBUTING.md](../CONTRIBUTING.md) を参照。設計判断の理由は「既知の落とし穴」節にまとめている。このガイドでは「導入時に何をすべきか」に絞る。
 
 ## 前提条件
 
@@ -78,6 +78,6 @@ pre_bump_hooks = [
 
 ## 導入後の検証手順
 
-- `cog bump --auto` の挙動をマージ前に scratch git repo で検証する(手順は [CLAUDE.md](../CLAUDE.md) の「Verifying `cog.toml` changes before merging」を参照)
+- `cog bump --auto` の挙動を、実際の CI に載せる前に scratch git repo で検証する。cocogitto の挙動(bump ルール・CHANGELOG 挿入・hooks)には非自明な癖があるため、本番相当の設定を信用する前に使い捨てリポジトリで確認する。[cocogitto releases](https://github.com/cocogitto/cocogitto/releases) から `cog` バイナリ(`x86_64-unknown-linux-musl` tarball が Linux コンテナ内で追加セットアップ無しに動く)を取得し、検証したい型のコミットを積んだ使い捨てリポジトリで `cog bump --auto` を実行する
 - GitHub リポジトリに `no-release` ラベルを作成する
 - ブランチ保護の Required status checks に release workflow のジョブを追加する(`no-release` ラベル付き PR でもジョブ自体は成功で完了する設計のため、必須チェックとして運用しても問題ない)
