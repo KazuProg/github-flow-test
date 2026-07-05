@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - - -
+## [v1.1.0](https://github.com/KazuProg/github-flow-test/compare/cf5f08d2862bc53d1ce0e87893c31a1311262192..v1.1.0) - 2026-07-05
+#### Features
+- mention cocogitto as the release automation tool in README - ([cf5f08d](https://github.com/KazuProg/github-flow-test/commit/cf5f08d2862bc53d1ce0e87893c31a1311262192)) - KazuProg
+
+- - -
+
 
 ## [1.0.0] - 2026-07-05
 
