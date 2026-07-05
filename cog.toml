@@ -7,7 +7,6 @@
 
 tag_prefix = "v"
 branch_whitelist = ["main"]
-skip_ci = "[skip ci]"
 
 pre_bump_hooks = [
   "npm version {{version}} --no-git-tag-version --allow-same-version",
