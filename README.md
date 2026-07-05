@@ -8,6 +8,8 @@ GitHub Flow + Conventional Commits ベースの自動リリース検証用リポ
 
 コミットメッセージ規約は [CONTRIBUTING.md](CONTRIBUTING.md) を参照。
 
+この仕組みを他リポジトリに導入する手順は [docs/adopt-github-flow.md](docs/adopt-github-flow.md) を参照。
+
 ## このリポジトリで検証していること
 
 - CI専用ツール(linter等)は `package.json`/`pyproject.toml` に依存として持たせず、`.github/workflows/*.yml` 側でオンデマンド取得して完結させる
