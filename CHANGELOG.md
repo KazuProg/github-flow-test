@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - - -
+## [v1.2.1](https://github.com/KazuProg/github-flow-test/compare/0db125ceefa31817e8fbcd498371309258ad6824..v1.2.1) - 2026-07-05
+#### Documentation
+- document ci as release-worthy in this repo - ([462c509](https://github.com/KazuProg/github-flow-test/commit/462c509655beec601e97d650c8e7d47b159ce9dc)) - KazuProg
+- consolidate duplicated release-process explanations - ([7f150be](https://github.com/KazuProg/github-flow-test/commit/7f150bee5afd5c6286675aa439a9c1a84de0524b)) - KazuProg
+- generalize merge-strategy guidance to include Merge commit - ([86c1a3a](https://github.com/KazuProg/github-flow-test/commit/86c1a3af4fe6a11c44644546ea601568665d21c3)) - KazuProg
+- backfill CLAUDE.md context lost when removing dead links - ([b531bb0](https://github.com/KazuProg/github-flow-test/commit/b531bb0d1ce0683d388f58e1c131837d4afc8510)) - KazuProg
+- remove dead links to untracked CLAUDE.md in adoption guide - ([d644fd2](https://github.com/KazuProg/github-flow-test/commit/d644fd2456657c49a97f6527515187dbf1206004)) - KazuProg
+- add guide for adopting this release pipeline elsewhere - ([0db125c](https://github.com/KazuProg/github-flow-test/commit/0db125ceefa31817e8fbcd498371309258ad6824)) - KazuProg
+#### Continuous Integration
+- treat ci commits as patch-bump-eligible - ([24930c1](https://github.com/KazuProg/github-flow-test/commit/24930c115a3774648207305ebac0416b3e6395b5)) - KazuProg
+- drop stale paths-ignore from release trigger - ([82d0c97](https://github.com/KazuProg/github-flow-test/commit/82d0c97e5d496d5eacfb5328001396c49ca8562e)) - KazuProg
+
+- - -
+
 ## [v1.2.0](https://github.com/KazuProg/github-flow-test/compare/78d3509a32172617e7e4540db366c2e7fc2d3b2e..v1.2.0) - 2026-07-05
 #### Features
 - note CD trigger guidance for release-vs-merge commit split - ([0a140e4](https://github.com/KazuProg/github-flow-test/commit/0a140e439b8ddc4547d3b19f9a5a809d9edb41f1)) - KazuProg
