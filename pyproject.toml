@@ -1,5 +1,5 @@
 [project]
 name = "python-example"
-version = "1.1.2"
+version = "1.2.0"
 description = "Python版の自動リリース検証用サンプル(GitHub Flow + cocogitto)"
 requires-python = ">=3.13"

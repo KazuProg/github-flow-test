@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - - -
+## [v1.2.0](https://github.com/KazuProg/github-flow-test/compare/78d3509a32172617e7e4540db366c2e7fc2d3b2e..v1.2.0) - 2026-07-05
+#### Features
+- note CD trigger guidance for release-vs-merge commit split - ([0a140e4](https://github.com/KazuProg/github-flow-test/commit/0a140e439b8ddc4547d3b19f9a5a809d9edb41f1)) - KazuProg
+#### Documentation
+- document this repo's CI/release design goals in README - ([7e4b6fc](https://github.com/KazuProg/github-flow-test/commit/7e4b6fc1b39e1be0ad6c093e930bf7b50d766034)) - KazuProg
+#### Continuous Integration
+- trigger release on PR merge, skip via no-release label - ([dd9fb05](https://github.com/KazuProg/github-flow-test/commit/dd9fb0527c89587cd8d78192c9cfb3e147af0c5c)) - KazuProg
+#### Chores
+- skip release bump for non-product commit types - ([78d3509](https://github.com/KazuProg/github-flow-test/commit/78d3509a32172617e7e4540db366c2e7fc2d3b2e)) - KazuProg
+
+- - -
+
 ## [v1.1.2](https://github.com/KazuProg/github-flow-test/compare/893a74ce7e0bf77a8bc1c1e3484939ab86fd59f7..v1.1.2) - 2026-07-05
 #### Continuous Integration
 - fetch commitlint via npx instead of package.json deps - ([893a74c](https://github.com/KazuProg/github-flow-test/commit/893a74ce7e0bf77a8bc1c1e3484939ab86fd59f7)) - KazuProg
