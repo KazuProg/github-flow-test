@@ -72,6 +72,10 @@ Conventional Commits 形式としてパースできないコミットは、cocog
 
 タイトル・説明文を変更する場合も、このマーカー行より前に置く限り自由に編集してよい(マーカー自体は削除しないこと)。
 
+## CHANGELOG.md の日付
+
+各リリースエントリの日付は cocogitto が `Utc::now()` で生成しており、**UTC** 表記になる。`cog.toml` にタイムゾーンを設定する項目はなく、実行環境(GitHub Actions ランナー等)のタイムゾーン設定にも依存しない。JST基準の日付とは最大9時間のずれが生じうる。
+
 ## Node/Python の同期バージョニング
 
 `package.json`(Node)と `pyproject.toml`(Python)は**同じコミット履歴を見て同期してバージョンアップする**(`feat:` があれば両方 minor、`BREAKING CHANGE`/`!` があれば両方 major、それ以外は両方 patch)。タグ・CHANGELOG も Node/Python 共通で単一(`v{version}` タグ、`CHANGELOG.md` 一本)。
