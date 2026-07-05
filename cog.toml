@@ -28,7 +28,9 @@ repository = "github-flow-test"
 
 # CONTRIBUTING.md の type 一覧テーブルと 1:1 対応させる。
 # feat/fix はcocogittoの組み込みデフォルトと実質一致するが、対応を明示するため書く。
-# それ以外はbump_patchを明示しないとデフォルトfalseのまま(catch-allルールが無いため)。
+# 成果物(package.json/pyproject.tomlのバージョン)に実質的な変更を伴う型のみ
+# bump_patchを明示する(catch-allルールが無いため、無指定の型は静的にバンプ対象外)。
+# ci/docs/style/test/choreは成果物に影響しないためbump_patchを付けない。
 
 [commit_types.feat]
 changelog_title = "Features"
@@ -57,17 +59,14 @@ order = 5
 
 [commit_types.docs]
 changelog_title = "Documentation"
-bump_patch = true
 order = 6
 
 [commit_types.style]
 changelog_title = "Styles"
-bump_patch = true
 order = 7
 
 [commit_types.test]
 changelog_title = "Tests"
-bump_patch = true
 order = 8
 
 [commit_types.build]
@@ -77,10 +76,8 @@ order = 9
 
 [commit_types.ci]
 changelog_title = "Continuous Integration"
-bump_patch = true
 order = 10
 
 [commit_types.chore]
 changelog_title = "Chores"
-bump_patch = true
 order = 11
