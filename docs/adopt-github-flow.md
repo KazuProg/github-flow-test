@@ -15,7 +15,7 @@
 | ファイル | 対応 |
 | --- | --- |
 | [`cog.toml`](../cog.toml) | 要カスタマイズ(後述) |
-| [`.github/workflows/lint-commits.yml`](../.github/workflows/lint-commits.yml) | 言語非依存。そのままコピー可 |
+| [`.github/workflows/lint-commits.yml`](../.github/workflows/lint-commits.yml) | 言語非依存。そのままコピー可。commitlint は `package.json` の依存に持たせず、workflow 側で `npx --package` を使って都度オンデマンド取得している(CI 専用ツールをマニフェストに残さない設計) |
 | [`.github/workflows/release.yml`](../.github/workflows/release.yml) | 言語非依存。そのままコピー可 |
 | `CHANGELOG.md` | 新規作成。`- - -` という行単独のマーカーが必須(無いと `cog bump` が失敗する) |
 | [`CONTRIBUTING.md`](../CONTRIBUTING.md) のブランチ運用・コミット規約セクション | 対象リポジトリ向けに文言調整して転記 |
@@ -60,6 +60,10 @@ pre_bump_hooks = [
 ]
 ```
 
+### 複数マニフェストを独立してバージョニングしたい場合
+
+`pre_bump_hooks` で複数マニフェストを書き換える構成は、リポジトリ全体のコミット履歴で単一のバージョンを算出し、対象マニフェスト全部に同じ番号を書き込む(= 常にロックステップで動く)。パッケージごとに別々のバージョン・タグ・CHANGELOG で独立運用したい場合は、cocogitto の `[monorepo.packages.*]` 機能を使う拡張余地がある。ただし依存関係リゾルバーは Cargo/Maven/Npm のみ対応で、Python 等は対象外。
+
 ## カスタマイズが必要な設定値
 
 - `tag_prefix`: タグの接頭辞
@@ -73,7 +77,7 @@ pre_bump_hooks = [
 - 現在のバージョンの major が `0` の間は `BREAKING CHANGE`/`!` があっても major bump されない(cocogitto にハードコードされており設定で無効化できない)。`1.0.0` から運用を始めるとこの制約を回避できる
 - `CHANGELOG.md` に `- - -` マーカー行が無いと `cog bump` 自体が失敗する
 - Rebase and merge では、PR の `head.sha` と `main` にマージされた後のコミット SHA が一致しない。release workflow を `pull_request: closed` でトリガーする場合、`actions/checkout` で明示的に `ref: main` を指定し、リリース有無の判定も `github.sha` ではなくワークフロー内で記録した pre-bump HEAD との比較で行う
-- release workflow を `push: branches: [main]` トリガーにすると、cocogitto の bump commit 自身が同じ workflow を再トリガーする。`pull_request: types: [closed]` + `github.event.pull_request.merged == true` ガードにすることで回避でき、bump commit に `[skip ci]` を付ける必要も無くなる
+- release workflow を `push: branches: [main]` トリガーにすると、cocogitto の bump commit 自身が同じ workflow を再トリガーする。これを防ぐために bump commit へ GitHub 標準の `[skip ci]` キーワードを付ける対処は別の問題を生む: `[skip ci]` はそのコミットに対する **全 workflow の check run** を抑制してしまう(特定の workflow だけを止められない)ため、「このコミットだけ CI をスキップしたい」と「必須ステータスチェックとして運用したい」が両立しなくなり、チェックが一度も report されないまま PR がブロックされ続ける。`pull_request: types: [closed]` + `github.event.pull_request.merged == true` ガードに切り替えれば、bump commit の `git push` はこのトリガー条件に一致しないため再トリガー自体が起きず、`[skip ci]` も不要になる
 - 外部 CD(デプロイ先のプラットフォーム等)を連携させる場合、`main` への push ではなく `release: published` イベントをトリガーにする。PR のマージコミットと cocogitto の bump commit は別々に `main` へ push されるため、push トリガーだと1回のリリースで2回デプロイが走る
 
 ## 導入後の検証手順
