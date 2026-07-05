@@ -26,7 +26,8 @@ repository = "github-flow-test"
 # feat/fix はcocogittoの組み込みデフォルトと実質一致するが、対応を明示するため書く。
 # 成果物(package.json/pyproject.tomlのバージョン)に実質的な変更を伴う型のみ
 # bump_patchを明示する(catch-allルールが無いため、無指定の型は静的にバンプ対象外)。
-# ci/docs/style/test/choreは成果物に影響しないためbump_patchを付けない。
+# docs/style/test/choreは成果物に影響しないためbump_patchを付けない。
+# ciは本リポジトリの性質上bump対象にしている(詳細はCONTRIBUTING.md参照)。
 
 [commit_types.feat]
 changelog_title = "Features"
@@ -72,6 +73,7 @@ order = 9
 
 [commit_types.ci]
 changelog_title = "Continuous Integration"
+bump_patch = true
 order = 10
 
 [commit_types.chore]
