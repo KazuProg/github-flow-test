@@ -3,13 +3,13 @@
 ## ブランチ運用
 
 - `main` に向けて開発ブランチ(`feature/*`, `fix/*`, `chore/*` など)から PR を作成する
-- PR は **Rebase and merge** で `main` に統合する
+- PR は `main` に統合する。**Rebase and merge** または **Merge commit** を使う(個々のコミットがそのまま `main` の履歴に残り、バージョン判定・CHANGELOG生成の入力になる方式のため)。**Squash and merge** を使う場合は圧縮後のコミットメッセージ自体を Conventional Commits 形式にする必要がある(`lint-commits.yml` は個別コミットのみを検査し、圧縮後メッセージは対象外)
 - PR が `main` にマージされると、`.github/workflows/release.yml` が [cocogitto](https://docs.cocogitto.io/) を実行し、バージョン bump・`CHANGELOG.md` 更新・`package.json`/`pyproject.toml` の version 更新・タグ作成・GitHub Release 作成を自動で行う
 - リリースさせたくないPRには `no-release` ラベルを付けてマージする(ワークフロー自体は実行されるが、リリース処理だけがスキップされる)
 
 ## コミットメッセージ規約
 
-rebase-merge では PR 内の各コミットがそのまま `main` の履歴に残り、**個々のコミットメッセージ**がバージョン判定と CHANGELOG 生成の入力になる(PR タイトルではない)。[Conventional Commits](https://www.conventionalcommits.org/) 形式で書くこと。
+Rebase and merge / Merge commit では PR 内の各コミットがそのまま `main` の履歴に残り、**個々のコミットメッセージ**がバージョン判定と CHANGELOG 生成の入力になる(PR タイトルではない)。[Conventional Commits](https://www.conventionalcommits.org/) 形式で書くこと。
 
 PR の作成・更新時に `.github/workflows/lint-commits.yml` が [commitlint](https://commitlint.js.org/) で各コミットの形式を自動チェックする。
 
@@ -58,7 +58,7 @@ bump_patch = true
 
 ### 規約に沿わないコミット
 
-Conventional Commits 形式としてパースできないコミットは、cocogitto によって**静的に無視される**(CHANGELOG に載らないだけでなく、バージョンにも一切影響しない)。PR時点で `.github/workflows/lint-commits.yml` の commitlint が形式を強制しているため、main にマージされた時点で規約違反のコミットが混入するリスクは低い。
+Conventional Commits 形式としてパースできないコミットは、cocogitto によって**静的に無視される**(CHANGELOG に載らないだけでなく、バージョンにも一切影響しない)。PR時点で `.github/workflows/lint-commits.yml` の commitlint が形式を強制しているため、main にマージされた時点で規約違反のコミットが混入するリスクは低い。Merge commit で生成される GitHub 標準のマージコミット(例: `Merge pull request #12 from ...`)もこの無視対象に含まれる。
 
 ### 心がけること
 
