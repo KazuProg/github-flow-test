@@ -3,10 +3,6 @@
   "version": "0.4.1",
   "private": true,
   "devDependencies": {
-    "semantic-release": "^25.0.5",
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/git": "^10.0.1",
-    "conventional-changelog-conventionalcommits": "9.3.1",
     "@commitlint/cli": "^21.2.0",
     "@commitlint/config-conventional": "^21.2.0"
   }

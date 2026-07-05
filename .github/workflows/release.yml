@@ -15,12 +15,10 @@ permissions:
   contents: read
 
 jobs:
-  release-node:
+  release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      issues: write
-      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,40 +30,34 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Verify the integrity of provenance attestations and registry signatures
-        run: npm audit signatures
-
-      - name: Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
-
-  release-python:
-    needs: release-node
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Bump version, changelog and tag (cocogitto)
+        id: release
+        uses: cocogitto/cocogitto-action@v4.1.0
         with:
-          ref: main
-          fetch-depth: 0
+          command: bump
+          args: --auto --skip-ci
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Detect whether a release actually happened
+        id: bumped
+        run: |
+          if [ "$(git rev-parse HEAD)" != "${{ github.sha }}" ]; then
+            echo "released=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "released=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Extract release notes for the new tag
+        id: changelog
+        if: steps.bumped.outputs.released == 'true'
+        uses: cocogitto/cocogitto-action@v4.1.0
         with:
-          python-version: "3.13"
+          command: changelog
+          args: "--at ${{ steps.release.outputs.version }}"
 
-      - name: Install python-semantic-release
-        run: pip install python-semantic-release==10.6.0
-
-      - name: Release (Python)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: semantic-release version
+      - name: Create GitHub Release
+        if: steps.bumped.outputs.released == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release.outputs.version }}
+          name: ${{ steps.release.outputs.version }}
+          body: ${{ steps.changelog.outputs.stdout }}
