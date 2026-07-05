@@ -1,9 +1,6 @@
 # cocogitto configuration
 # Node (package.json) と Python (pyproject.toml) を同一コミット履歴で同期バンプする。
-# モノレポ機能 ([monorepo.packages.*]) は使わない: 依存関係リゾルバーが
-# Cargo/Maven/Npm のみで Python 未対応であり、「repo root の2ファイルを常に
-# 同じバージョンにしたいだけ」の今回の用途には過剰設計(YAGNI)。
-# 通常のトップレベル pre_bump_hooks/post_bump_hooks で両ファイルを書き換える。
+# 設計背景は CONTRIBUTING.md の「Node/Python の同期バージョニング」を参照。
 
 tag_prefix = "v"
 branch_whitelist = ["main"]

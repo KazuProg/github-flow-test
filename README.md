@@ -16,5 +16,5 @@ GitHub Flow + Conventional Commits ベースの自動リリース検証用リポ
 - プロジェクト・設定ファイルへの介入を必要最小限に保つ
 - `main` への直接pushを行わず、必ずブランチ + PR経由でマージする
 - 成果物(`package.json`/`pyproject.toml` のバージョン)に実質的な変更が無いコミット種別(`ci`/`docs`/`style`/`test`/`chore`)ではリリースを発行しない
-- リリースさせたくないPRには `no-release` ラベルを付けてマージすることでリリース処理だけをスキップできる(コミットメッセージへの予約語混入は不要。他のワークフローの必須チェックにも影響しない)
-- リリースコミット(バージョン bump)は PR のマージコミットとは別に cocogitto が直接 `main` へ push するため、外部 CD を `main` への push ではなく GitHub Release の作成(`release: published`)に紐付けることで二重デプロイを避けられる
+- リリースさせたくないPRには `no-release` ラベルを付ける(詳細は [CONTRIBUTING.md](CONTRIBUTING.md) を参照)
+- 外部 CD と連携する場合の注意点は [docs/adopt-github-flow.md](docs/adopt-github-flow.md) を参照

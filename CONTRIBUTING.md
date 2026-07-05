@@ -75,13 +75,6 @@ Conventional Commits 形式としてパースできないコミットは、cocog
 
 `package.json`(Node)と `pyproject.toml`(Python)は**同じコミット履歴を見て同期してバージョンアップする**(`feat:` があれば両方 minor、`BREAKING CHANGE`/`!` があれば両方 major、それ以外は両方 patch)。タグ・CHANGELOG も Node/Python 共通で単一(`v{version}` タグ、`CHANGELOG.md` 一本)。
 
-`cog.toml` の `pre_bump_hooks` で両方のマニフェストを1つのバージョンに書き換えている。
-
-```toml
-pre_bump_hooks = [
-  "npm version {{version}} --no-git-tag-version --allow-same-version",
-  "sed -i 's/^version = \".*\"$/version = \"{{version}}\"/' pyproject.toml",
-]
-```
+両方のマニフェストを1つのバージョンに書き換える処理は [cog.toml](cog.toml) の `pre_bump_hooks` を参照。
 
 Node用・Python用の変更を区別せず、リポジトリ全体のコミットで判定される。これは「両方の構成を見比べる」という検証目的に合わせた意図的な設計であり、将来Python側の変更だけを対象にしたい場合は cocogitto の `[monorepo.packages.*]` 機能で独立させる拡張余地がある(ただし依存関係リゾルバーは Cargo/Maven/Npm のみで Python 未対応)。
