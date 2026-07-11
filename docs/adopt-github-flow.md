@@ -68,7 +68,7 @@ pre_bump_hooks = [
 
 - `tag_prefix`: タグの接頭辞
 - `[changelog] owner` / `repository`: GitHub の org/repo 名
-- `[commit_types.<type>] bump_patch` / `bump_minor`: どの type を成果物のバージョンに影響する変更とみなすかは、対象プロジェクトの性質に応じて type ごとに見直す(catch-all ルールが無いため、無指定の型は静的にバンプ対象外になる)。例えばこのリポジトリでは `ci` の変更自体が実質的な成果物(リリース自動化の仕組み)なので `bump_patch = true` にしているが、CI設定がリリース物と無関係な一般的なプロジェクトでは `ci` を対象外にするのが標準的
+- `[commit_types.<type>] bump_patch` / `bump_minor`: どの type を成果物のバージョンに影響する変更とみなすかは、対象プロジェクトの性質に応じて type ごとに見直す(catch-all ルールが無いため、無指定の型は静的にバンプ対象外になる)。例えばこのリポジトリでは `ci` の変更自体が実質的な成果物(リリース自動化の仕組み)への機能追加・更新とみなし `bump_minor = true` にしているが、CI設定がリリース物と無関係な一般的なプロジェクトでは `ci` を対象外にするのが標準的
 - `branch_whitelist`: リリース対象ブランチ
 
 ## 既知の落とし穴

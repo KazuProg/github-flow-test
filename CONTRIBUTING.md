@@ -38,21 +38,24 @@ PR の作成・更新時に `.github/workflows/lint-commits.yml` が [commitlint
 ### バージョン bump のルール
 
 - コミットの本文/フッターに `BREAKING CHANGE:` があるか、`type!:` のように `!` が付いていれば **major** バージョンアップ
-- そうでないコミットに `feat:` が1つでもあれば **minor** バージョンアップ
-- そうでなくても `fix`/`perf`/`revert`/`refactor`/`build`/`ci` のいずれかがあれば **patch** バージョンアップ
+- そうでないコミットに `feat:`/`ci:` が1つでもあれば **minor** バージョンアップ
+- そうでなくても `fix`/`perf`/`revert`/`refactor`/`build` のいずれかがあれば **patch** バージョンアップ
 - `docs`/`style`/`test`/`chore` のみの場合は **バージョンアップされない**(成果物である `package.json`/`pyproject.toml` に実質的な変更が無いため)。この場合コミットはCHANGELOGにも一旦反映されず、次にバンプ対象のコミットが入ったリリースでまとめて反映される
-- `ci` は例外的に patch バージョンアップ対象にしている。このリポジトリの成果物は実質的に「リリース自動化の仕組みそのもの」であり、CI設定の変更もその成果物の変更とみなせるため(一般的なプロジェクトでは `ci` をバンプ対象にしないのが標準。導入先での判断基準は [docs/adopt-github-flow.md](docs/adopt-github-flow.md) を参照)
+- `ci` は例外的に `feat` と同じ minor バージョンアップ対象にしている。このリポジトリの成果物は実質的に「リリース自動化の仕組みそのもの」であり、CI設定の変更はその成果物への機能追加・更新に相当するため(一般的なプロジェクトでは `ci` をバンプ対象にしないのが標準。導入先での判断基準は [docs/adopt-github-flow.md](docs/adopt-github-flow.md) を参照)
 
-cocogitto は標準設定では `fix`/`feat`/`BREAKING CHANGE` の3つしかバージョンに影響させず、それ以外の型では何もバージョンを上げない。「該当typeが無ければ常にpatch」というcatch-allルールが無いため、成果物に実質的な変更を伴う型のみ `cog.toml` の `[commit_types.<type>]` で `bump_patch = true` を明示している。
+cocogitto は標準設定では `fix`/`feat`/`BREAKING CHANGE` の3つしかバージョンに影響させず、それ以外の型では何もバージョンを上げない。「該当typeが無ければ常にpatch」というcatch-allルールが無いため、成果物に実質的な変更を伴う型のみ `cog.toml` の `[commit_types.<type>]` で `bump_minor`/`bump_patch` を明示している。
 
 ```toml
 [commit_types.fix]
 bump_patch = true
 
+[commit_types.ci]
+bump_minor = true
+
 [commit_types.chore]
 # bump_patch は付けない(成果物に影響しないため)
 
-# ... 他 perf/revert/refactor/build/ci は bump_patch あり、docs/style/test は無し
+# ... 他 perf/revert/refactor/build は bump_patch あり、docs/style/test は無し
 ```
 
 なお cocogitto は「現在のバージョンが `0.x` の間は BREAKING CHANGE があっても major へ上げない」という SemVer の初期開発規約をハードコードしており、設定で無効化できない。このリポジトリは `1.0.0` 以降で運用しているため、この制約には該当しない。
@@ -64,7 +67,7 @@ Conventional Commits 形式としてパースできないコミットは、cocog
 ### 心がけること
 
 - 1コミット1トピックにする(各コミットがそのまま CHANGELOG の1行になるため)
-- `chore`/`docs`/`style`/`test` のみの PR ではリリースが発行されない(成果物に変更が無いため)。`ci` のみの PR はこのリポジトリではリリース対象になる
+- `chore`/`docs`/`style`/`test` のみの PR ではリリースが発行されない(成果物に変更が無いため)。`ci` のみの PR はこのリポジトリでは minor リリース対象になる
 
 ## CHANGELOG.md のマーカー
 
