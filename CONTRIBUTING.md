@@ -68,6 +68,7 @@ Conventional Commits 形式としてパースできないコミットは、cocog
 
 - 1コミット1トピックにする(各コミットがそのまま CHANGELOG の1行になるため)
 - `chore`/`docs`/`style`/`test` のみの PR ではリリースが発行されない(成果物に変更が無いため)。`ci` のみの PR はこのリポジトリでは minor リリース対象になる
+- `fixup!`/`squash!` で始まるコミットを含むPRは `no-fixup-commits` チェックで弾かれる。マージ前に `git rebase -i --autosquash` 等で解消すること
 
 ## CHANGELOG.md のマーカー
 
