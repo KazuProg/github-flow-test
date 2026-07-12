@@ -80,6 +80,7 @@ pre_bump_hooks = [
 - release workflow を `push: branches: [main]` トリガーにすると、cocogitto の bump commit 自身が同じ workflow を再トリガーする。これを防ぐために bump commit へ GitHub 標準の `[skip ci]` キーワードを付ける対処は別の問題を生む: `[skip ci]` はそのコミットに対する **全 workflow の check run** を抑制してしまう(特定の workflow だけを止められない)ため、「このコミットだけ CI をスキップしたい」と「必須ステータスチェックとして運用したい」が両立しなくなり、チェックが一度も report されないまま PR がブロックされ続ける。`pull_request: types: [closed]` + `github.event.pull_request.merged == true` ガードに切り替えれば、bump commit の `git push` はこのトリガー条件に一致しないため再トリガー自体が起きず、`[skip ci]` も不要になる
 - 外部 CD(デプロイ先のプラットフォーム等)を連携させる場合、`main` への push ではなく `release: published` イベントをトリガーにする。PR のマージコミットと cocogitto の bump commit は別々に `main` へ push されるため、push トリガーだと1回のリリースで2回デプロイが走る
 - `pull_request: closed` トリガーは `startup_failure` のような GitHub 側の起動エラーが起きても re-run できない。手動での復旧手段として `workflow_dispatch` を併設し、job の `if:` 条件は `github.event_name == 'workflow_dispatch'` を先頭に OR で追加する(`workflow_dispatch` イベントには `github.event.pull_request` が存在しないため、既存条件のままだと手動実行時に job がスキップされる)
+- 対象リポジトリの `main` に「PR経由の変更のみ許可」等のブランチ保護ルールセットが設定されている場合、cocogittoの `post_bump_hooks` による直接pushは `GITHUB_TOKEN` では拒否される。write権限付きのSSH Deploy Keyを登録し、秘密鍵をリポジトリシークレットとして保存した上で、対象ルールセットすべてに `{"actor_type": "DeployKey", "actor_id": null, "bypass_mode": "always"}` をbypass actorとして追加し、checkoutステップで `ssh-key: ${{ secrets.<SECRET_NAME> }}` を指定する
 
 ## 導入後の検証手順
 
