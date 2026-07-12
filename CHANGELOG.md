@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - - -
+## [v1.3.0](https://github.com/KazuProg/github-flow-test/compare/ca220a1a32d3f4413255acd27ec09ce1b5e7fb74..v1.3.0) - 2026-07-12
+#### Documentation
+- note CHANGELOG.md dates are UTC, not JST - ([cdf02e2](https://github.com/KazuProg/github-flow-test/commit/cdf02e220d42e45c3200cc7f33bccd75d747d1c6)) - KazuProg
+#### Continuous Integration
+- push release commits via deploy key to satisfy branch protection - ([7d837e8](https://github.com/KazuProg/github-flow-test/commit/7d837e8a72182a8ff6399b29fd3e940ee32f9c87)) - KazuProg
+- add workflow_dispatch trigger to release workflow - ([bfc2f6a](https://github.com/KazuProg/github-flow-test/commit/bfc2f6a4be19e958f29e2989d6805ac7a2a104f7)) - KazuProg
+- add bump-level-label workflow - ([471344b](https://github.com/KazuProg/github-flow-test/commit/471344b5ac37d5af681fbf05b2b84c6cec77d3b0)) - KazuProg
+- bump ci commits as minor instead of patch - ([adfb4d1](https://github.com/KazuProg/github-flow-test/commit/adfb4d1393a071cdf6c4896581b04ae02ee6717e)) - KazuProg
+- fail PRs containing fixup/squash commits - ([ca220a1](https://github.com/KazuProg/github-flow-test/commit/ca220a1a32d3f4413255acd27ec09ce1b5e7fb74)) - KazuProg
+#### Chores
+- add script to create bump-level and no-release labels - ([3369051](https://github.com/KazuProg/github-flow-test/commit/3369051781fd9f5ded257675fad4ef8e6d42abaf)) - KazuProg
+
+- - -
+
 ## [v1.2.1](https://github.com/KazuProg/github-flow-test/compare/0db125ceefa31817e8fbcd498371309258ad6824..v1.2.1) - 2026-07-05
 #### Documentation
 - document ci as release-worthy in this repo - ([462c509](https://github.com/KazuProg/github-flow-test/commit/462c509655beec601e97d650c8e7d47b159ce9dc)) - KazuProg
