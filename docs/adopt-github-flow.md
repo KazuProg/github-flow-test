@@ -9,6 +9,7 @@
 - GitHub でホストされたリポジトリで、`main`(または任意の1本)を唯一の長命ブランチとして運用できる
 - PR のマージ方式を **Rebase and merge** または **Merge commit** に統一できる(個々のコミットが `main` の履歴に残る方式であることが必須)。**Squash and merge** を使う場合は圧縮後のコミットメッセージ自体を Conventional Commits 形式にする必要がある(詳細は [CONTRIBUTING.md](../CONTRIBUTING.md) を参照)
 - ブランチ保護で Required status checks を設定できる権限がある
+- (任意)このリポジトリと同様に「PR経由の変更のみ許可」を強制する場合は、Rulesets作成・Deploy Key登録・Secrets設定を行えるリポジトリ管理者権限が必要(「GitHubリポジトリ設定」節を参照)
 
 ## コピーするファイル
 
@@ -19,6 +20,9 @@
 | [`.github/workflows/release.yml`](../.github/workflows/release.yml) | 言語非依存。そのままコピー可 |
 | `CHANGELOG.md` | 新規作成。`- - -` という行単独のマーカーが必須(無いと `cog bump` が失敗する) |
 | [`CONTRIBUTING.md`](../CONTRIBUTING.md) のブランチ運用・コミット規約セクション | 対象リポジトリ向けに文言調整して転記 |
+| [`.github/workflows/no-fixup-commits.yml`](../.github/workflows/no-fixup-commits.yml) | 言語非依存。`No Fixup Commits` ルールセット(後述)を使う場合のみ必要 |
+| [`.github/workflows/bump-level-label.yml`](../.github/workflows/bump-level-label.yml) | 言語非依存。PRにbumpレベルのラベルを自動付与する任意機能。無くても release workflow は動く |
+| [`scripts/create-labels.sh`](../scripts/create-labels.sh) | `bump-level-label.yml` と `release.yml` の `no-release` スキップが参照する4ラベル(`major-update`/`minor-update`/`patch-update`/`no-release`)を作成する。導入時に1回実行する |
 
 ## pre_bump_hooks: 対象プロジェクトごとのバージョン書き換え
 
@@ -64,6 +68,94 @@ pre_bump_hooks = [
 
 `pre_bump_hooks` で複数マニフェストを書き換える構成は、リポジトリ全体のコミット履歴で単一のバージョンを算出し、対象マニフェスト全部に同じ番号を書き込む(= 常にロックステップで動く)。パッケージごとに別々のバージョン・タグ・CHANGELOG で独立運用したい場合の制約は [CONTRIBUTING.md](../CONTRIBUTING.md) の「Node/Python の同期バージョニング」節を参照。
 
+## GitHubリポジトリ設定(ファイルとしてコピーできないもの)
+
+ここまでの「コピーするファイル」はすべてリポジトリ内のファイルだが、このリポジトリは追加で2つのGitHub Rulesetsを `main` に設定している。Rulesetsはリポジトリのファイルではなく GitHub 側の設定(Settings → Rules → Rulesets)のため、ファイルをコピーするだけでは再現できない。厳格な保護が不要なら、この節はスキップしてよい(release workflow 自体はブランチ保護が無くても動く)。
+
+### 1. PR必須ルールセット
+
+```json
+{
+  "name": "Default Branch Protection",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": { "ref_name": { "exclude": [], "include": ["~DEFAULT_BRANCH"] } },
+  "rules": [
+    { "type": "creation" },
+    { "type": "deletion" },
+    { "type": "non_fast_forward" },
+    {
+      "type": "pull_request",
+      "parameters": {
+        "required_approving_review_count": 0,
+        "dismiss_stale_reviews_on_push": true,
+        "required_reviewers": [],
+        "require_code_owner_review": false,
+        "require_last_push_approval": false,
+        "required_review_thread_resolution": true,
+        "allowed_merge_methods": ["rebase"]
+      }
+    }
+  ]
+}
+```
+
+### 2. no-fixup-commits必須チェックルールセット
+
+`.github/workflows/no-fixup-commits.yml` をコピー済みであることが前提。
+
+```json
+{
+  "name": "No Fixup Commits",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": { "ref_name": { "exclude": [], "include": ["~DEFAULT_BRANCH"] } },
+  "rules": [
+    {
+      "type": "required_status_checks",
+      "parameters": {
+        "strict_required_status_checks_policy": true,
+        "do_not_enforce_on_create": true,
+        "required_status_checks": [{ "context": "no-fixup-commits" }]
+      }
+    }
+  ]
+}
+```
+
+上記2つのJSONをそれぞれファイルに保存し、以下で作成する:
+
+```bash
+gh api --method POST repos/<owner>/<repo>/rulesets --input default-branch-protection.json
+gh api --method POST repos/<owner>/<repo>/rulesets --input no-fixup-commits.json
+```
+
+### 3. cocogittoの直接pushを通すDeploy Key
+
+上記2つのルールセットは `main` への直接pushも拒否する(`GITHUB_TOKEN` にはbypassする手段が無い)。cocogittoの `post_bump_hooks` による `git push` を通すには、write権限付きのSSH Deploy Keyを両ルールセットのbypass actorとして登録する。
+
+```bash
+# 1. 鍵ペアを生成
+ssh-keygen -t ed25519 -N "" -f release-deploy-key -C "release-bot@<repo>"
+
+# 2. write権限付きでDeploy Keyとして登録(idを控える)
+gh api repos/<owner>/<repo>/keys -f title="release-bot" -f key="$(cat release-deploy-key.pub)" -F read_only=false
+
+# 3. 秘密鍵をrepository secretとして保存
+gh secret set RELEASE_DEPLOY_KEY --repo <owner>/<repo> < release-deploy-key
+
+# 4. 鍵ペアのローカルコピーを削除
+rm -f release-deploy-key release-deploy-key.pub
+```
+
+その後、両ルールセットの `bypass_actors` に以下を追加する(既存の `rules`/`conditions` は変更せず、`bypass_actors` フィールドだけ追加した全体を `PUT` で送る):
+
+```json
+{ "actor_type": "DeployKey", "actor_id": null, "bypass_mode": "always" }
+```
+
+最後に、`release.yml` の `Checkout` ステップに `ssh-key: ${{ secrets.RELEASE_DEPLOY_KEY }}` を指定する(このリポジトリの `release.yml` は既にこの設定済みなので、そのままコピーすれば反映される)。
+
 ## カスタマイズが必要な設定値
 
 - `tag_prefix`: タグの接頭辞
@@ -80,10 +172,10 @@ pre_bump_hooks = [
 - release workflow を `push: branches: [main]` トリガーにすると、cocogitto の bump commit 自身が同じ workflow を再トリガーする。これを防ぐために bump commit へ GitHub 標準の `[skip ci]` キーワードを付ける対処は別の問題を生む: `[skip ci]` はそのコミットに対する **全 workflow の check run** を抑制してしまう(特定の workflow だけを止められない)ため、「このコミットだけ CI をスキップしたい」と「必須ステータスチェックとして運用したい」が両立しなくなり、チェックが一度も report されないまま PR がブロックされ続ける。`pull_request: types: [closed]` + `github.event.pull_request.merged == true` ガードに切り替えれば、bump commit の `git push` はこのトリガー条件に一致しないため再トリガー自体が起きず、`[skip ci]` も不要になる
 - 外部 CD(デプロイ先のプラットフォーム等)を連携させる場合、`main` への push ではなく `release: published` イベントをトリガーにする。PR のマージコミットと cocogitto の bump commit は別々に `main` へ push されるため、push トリガーだと1回のリリースで2回デプロイが走る
 - `pull_request: closed` トリガーは `startup_failure` のような GitHub 側の起動エラーが起きても re-run できない。手動での復旧手段として `workflow_dispatch` を併設し、job の `if:` 条件は `github.event_name == 'workflow_dispatch'` を先頭に OR で追加する(`workflow_dispatch` イベントには `github.event.pull_request` が存在しないため、既存条件のままだと手動実行時に job がスキップされる)
-- 対象リポジトリの `main` に「PR経由の変更のみ許可」等のブランチ保護ルールセットが設定されている場合、cocogittoの `post_bump_hooks` による直接pushは `GITHUB_TOKEN` では拒否される。write権限付きのSSH Deploy Keyを登録し、秘密鍵をリポジトリシークレットとして保存した上で、対象ルールセットすべてに `{"actor_type": "DeployKey", "actor_id": null, "bypass_mode": "always"}` をbypass actorとして追加し、checkoutステップで `ssh-key: ${{ secrets.<SECRET_NAME> }}` を指定する
+- 対象リポジトリの `main` に「PR経由の変更のみ許可」等のブランチ保護ルールセットが設定されている場合、cocogittoの `post_bump_hooks` による直接pushは `GITHUB_TOKEN` では拒否される。対応手順は「GitHubリポジトリ設定(ファイルとしてコピーできないもの)」節を参照
 
 ## 導入後の検証手順
 
 - `cog bump --auto` の挙動を、実際の CI に載せる前に scratch git repo で検証する。cocogitto の挙動(bump ルール・CHANGELOG 挿入・hooks)には非自明な癖があるため、本番相当の設定を信用する前に使い捨てリポジトリで確認する。[cocogitto releases](https://github.com/cocogitto/cocogitto/releases) から `cog` バイナリ(`x86_64-unknown-linux-musl` tarball が Linux コンテナ内で追加セットアップ無しに動く)を取得し、検証したい型のコミットを積んだ使い捨てリポジトリで `cog bump --auto` を実行する
-- GitHub リポジトリに `no-release` ラベルを作成する
+- `scripts/create-labels.sh` を実行し、`major-update`/`minor-update`/`patch-update`/`no-release` の4ラベルを作成する(`bump-level-label.yml` を導入しない場合は `no-release` のみで足りる)
 - ブランチ保護の Required status checks に release workflow のジョブを追加する(`no-release` ラベル付き PR でもジョブ自体は成功で完了する設計のため、必須チェックとして運用しても問題ない)
