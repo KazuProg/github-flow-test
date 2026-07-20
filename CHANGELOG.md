@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - - -
+## [v1.5.1](https://github.com/KazuProg/github-flow-test/compare/v1.5.0..v1.5.1) - 2026-07-20
+#### Chores
+- (**version**) v1.5.0 - ([486a6df](https://github.com/KazuProg/github-flow-test/commit/486a6df879bb9256fa02f53b36f96ec9c1b48a9d)) - github-actions
+
+- - -
+
 ## [v1.5.0](https://github.com/KazuProg/github-flow-test/compare/7abf34cf5fda04d44c13108193408ff2ac54dc01..v1.5.0) - 2026-07-20
 #### Documentation
 - document release-dispatch environment setup - ([7abf34c](https://github.com/KazuProg/github-flow-test/commit/7abf34cf5fda04d44c13108193408ff2ac54dc01)) - KazuProg
