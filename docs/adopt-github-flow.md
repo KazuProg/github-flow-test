@@ -9,7 +9,7 @@
 - GitHub でホストされたリポジトリで、`main`(または任意の1本)を唯一の長命ブランチとして運用できる
 - PR のマージ方式を **Rebase and merge** または **Merge commit** に統一できる(個々のコミットが `main` の履歴に残る方式であることが必須)。**Squash and merge** を使う場合は圧縮後のコミットメッセージ自体を Conventional Commits 形式にする必要がある(詳細は [CONTRIBUTING.md](../CONTRIBUTING.md) を参照)
 - ブランチ保護で Required status checks を設定できる権限がある
-- (任意)このリポジトリと同様に「PR経由の変更のみ許可」を強制する場合は、Rulesets作成・Deploy Key登録・Secrets設定を行えるリポジトリ管理者権限が必要(「GitHubリポジトリ設定」節を参照)
+- (任意)このリポジトリと同様に「PR経由の変更のみ許可」の強制や、手動リリースへの承認要求を行う場合は、Rulesets作成・Deploy Key登録・Secrets設定・Environment作成を行えるリポジトリ管理者権限が必要(「GitHubリポジトリ設定」節を参照)
 
 ## コピーするファイル
 
@@ -17,7 +17,7 @@
 | --- | --- |
 | [`cog.toml`](../cog.toml) | 要カスタマイズ(後述) |
 | [`.github/workflows/lint-commits.yml`](../.github/workflows/lint-commits.yml) | 言語非依存。そのままコピー可。commitlint は `package.json` の依存に持たせず、workflow 側で `npx --package` を使って都度オンデマンド取得している(CI 専用ツールをマニフェストに残さない設計) |
-| [`.github/workflows/release.yml`](../.github/workflows/release.yml) | 言語非依存。そのままコピー可 |
+| [`.github/workflows/release.yml`](../.github/workflows/release.yml) | 言語非依存。そのままコピー可。ただし `dispatch-approval` ジョブが参照する `release-dispatch` Environment は別途作成が必要(「GitHubリポジトリ設定」節を参照) |
 | `CHANGELOG.md` | 新規作成。`- - -` という行単独のマーカーが必須(無いと `cog bump` が失敗する) |
 | [`CONTRIBUTING.md`](../CONTRIBUTING.md) のブランチ運用・コミット規約セクション | 対象リポジトリ向けに文言調整して転記 |
 | [`.github/workflows/no-fixup-commits.yml`](../.github/workflows/no-fixup-commits.yml) | 言語非依存。`No Fixup Commits` ルールセット(後述)を使う場合のみ必要 |
@@ -70,7 +70,9 @@ pre_bump_hooks = [
 
 ## GitHubリポジトリ設定(ファイルとしてコピーできないもの)
 
-ここまでの「コピーするファイル」はすべてリポジトリ内のファイルだが、このリポジトリは追加で2つのGitHub Rulesetsを `main` に設定している。Rulesetsはリポジトリのファイルではなく GitHub 側の設定(Settings → Rules → Rulesets)のため、ファイルをコピーするだけでは再現できない。厳格な保護が不要なら、この節はスキップしてよい(release workflow 自体はブランチ保護が無くても動く)。
+ここまでの「コピーするファイル」はすべてリポジトリ内のファイルだが、このリポジトリは追加で2つのGitHub Rulesetsと1つのGitHub Environmentを設定している。これらはリポジトリのファイルではなく GitHub 側の設定(Settings → Rules → Rulesets、Settings → Environments)のため、ファイルをコピーするだけでは再現できない。
+
+Rulesets(1・2)は厳格な保護が不要ならスキップしてよい(release workflow 自体はブランチ保護が無くても動く)。Environment(4)は性質が異なる: `release.yml` が `environment: release-dispatch` を参照するジョブを含むため、この設定をスキップしたまま `workflow_dispatch` を有効にすると、GitHub が **保護ルール無しでEnvironmentを自動作成** し、誰でも無承認でリリースを手動実行できてしまう。承認ゲートが不要なら、Environment を作らずに `release.yml` 側の `dispatch-approval` ジョブと `release` ジョブの `needs`/`if` を削除すること。
 
 ### 1. PR必須ルールセット
 
@@ -156,6 +158,32 @@ rm -f release-deploy-key release-deploy-key.pub
 
 最後に、`release.yml` の `Checkout` ステップに `ssh-key: ${{ secrets.RELEASE_DEPLOY_KEY }}` を指定する(このリポジトリの `release.yml` は既にこの設定済みなので、そのままコピーすれば反映される)。
 
+### 4. 手動リリース(`workflow_dispatch`)の承認を要求するEnvironment
+
+`release.yml` の `workflow_dispatch` はデフォルトでは誰でも実行できる。管理者の承認が下りるまで実行をブロックするため、`release-dispatch` という Environment を作成し、Required reviewers を設定する。`release.yml` 側は `workflow_dispatch` のときだけ動く `dispatch-approval` ジョブが `environment: release-dispatch` を参照し、`release` ジョブが `needs: [dispatch-approval]` でその結果(`success` または `skipped`)を待つ構成になっている。PRマージ経由の自動リリースでは `dispatch-approval` が `skipped` になるため、承認は要求されない。
+
+```bash
+# 1. reviewerにするユーザーのidを取得
+gh api users/<reviewer-username> -q .id
+
+# 2. 上記idを使って設定ファイルを作成
+cat <<'EOF' > environment.json
+{
+  "reviewers": [
+    { "type": "User", "id": <reviewer-id> }
+  ]
+}
+EOF
+
+# 3. Environment作成 + Required reviewer設定(1コマンドで完結)
+gh api --method PUT repos/<owner>/<repo>/environments/release-dispatch --input environment.json
+
+# 4. 一時ファイルを削除
+rm -f environment.json
+```
+
+**`release.yml` を先に `main` へ反映する場合は、この設定を先に完了させること**。「GitHubリポジトリ設定」節冒頭で述べた通り、Environment は参照された時点で存在しなければ保護ルール無しで自動作成されるため、手順を後回しにすると最初の `workflow_dispatch` 実行が無承認で通ってしまう。
+
 ## カスタマイズが必要な設定値
 
 - `tag_prefix`: タグの接頭辞
@@ -171,7 +199,7 @@ rm -f release-deploy-key release-deploy-key.pub
 - マージ方式(Rebase and merge / Merge commit / Squash and merge のいずれでも)によらず、PR の `head.sha` と `main` にマージされた後のコミット SHA は一致しない。release workflow を `pull_request: closed` でトリガーする場合、`actions/checkout` で明示的に `ref: main` を指定し、リリース有無の判定も `github.sha` ではなくワークフロー内で記録した pre-bump HEAD との比較で行う
 - release workflow を `push: branches: [main]` トリガーにすると、cocogitto の bump commit 自身が同じ workflow を再トリガーする。これを防ぐために bump commit へ GitHub 標準の `[skip ci]` キーワードを付ける対処は別の問題を生む: `[skip ci]` はそのコミットに対する **全 workflow の check run** を抑制してしまう(特定の workflow だけを止められない)ため、「このコミットだけ CI をスキップしたい」と「必須ステータスチェックとして運用したい」が両立しなくなり、チェックが一度も report されないまま PR がブロックされ続ける。`pull_request: types: [closed]` + `github.event.pull_request.merged == true` ガードに切り替えれば、bump commit の `git push` はこのトリガー条件に一致しないため再トリガー自体が起きず、`[skip ci]` も不要になる
 - 外部 CD(デプロイ先のプラットフォーム等)を連携させる場合、`main` への push ではなく `release: published` イベントをトリガーにする。PR のマージコミットと cocogitto の bump commit は別々に `main` へ push されるため、push トリガーだと1回のリリースで2回デプロイが走る
-- `pull_request: closed` トリガーは `startup_failure` のような GitHub 側の起動エラーが起きても re-run できない。手動での復旧手段として `workflow_dispatch` を併設し、job の `if:` 条件は `github.event_name == 'workflow_dispatch'` を先頭に OR で追加する(`workflow_dispatch` イベントには `github.event.pull_request` が存在しないため、既存条件のままだと手動実行時に job がスキップされる)
+- `pull_request: closed` トリガーは `startup_failure` のような GitHub 側の起動エラーが起きても re-run できない。手動での復旧手段として `workflow_dispatch` を併設し、job の `if:` 条件は `github.event_name == 'workflow_dispatch'` を先頭に OR で追加する(`workflow_dispatch` イベントには `github.event.pull_request` が存在しないため、既存条件のままだと手動実行時に job がスキップされる)。この `workflow_dispatch` はデフォルトで誰でも実行できてしまうため、実行前に承認を要求したい場合は「GitHubリポジトリ設定」節の Environment 設定を参照
 - 対象リポジトリの `main` に「PR経由の変更のみ許可」等のブランチ保護ルールセットが設定されている場合、cocogittoの `post_bump_hooks` による直接pushは `GITHUB_TOKEN` では拒否される。対応手順は「GitHubリポジトリ設定(ファイルとしてコピーできないもの)」節を参照
 
 ## 導入後の検証手順
