@@ -14,8 +14,20 @@ permissions:
   contents: read
 
 jobs:
+  dispatch-approval:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: release-dispatch
+    steps:
+      - name: Approved
+        run: echo "Manual release dispatch approved."
+
   release:
-    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'no-release'))
+    needs: [dispatch-approval]
+    if: |
+      always() &&
+      (needs.dispatch-approval.result == 'success' || needs.dispatch-approval.result == 'skipped') &&
+      (github.event_name == 'workflow_dispatch' || (github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'no-release')))
     runs-on: ubuntu-latest
     permissions:
       contents: write
