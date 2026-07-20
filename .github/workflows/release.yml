@@ -4,7 +4,18 @@ on:
   pull_request:
     types: [closed]
     branches: [main]
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Bump level"
+        type: choice
+        options:
+          - auto
+          - major
+          - minor
+          - patch
+        default: auto
+        required: true
 
 concurrency:
   group: release
@@ -53,7 +64,7 @@ jobs:
         uses: cocogitto/cocogitto-action@v4.1.0
         with:
           command: bump
-          args: --auto
+          args: ${{ (github.event_name == 'workflow_dispatch' && inputs.bump != 'auto') && format('--{0}', inputs.bump) || '--auto' }}
 
       - name: Detect whether a release actually happened
         id: bumped
