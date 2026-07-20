@@ -60,6 +60,8 @@ bump_minor = true
 
 なお cocogitto は「現在のバージョンが `0.x` の間は BREAKING CHANGE があっても major へ上げない」という SemVer の初期開発規約をハードコードしており、設定で無効化できない。このリポジトリは `1.0.0` 以降で運用しているため、この制約には該当しない。
 
+手動実行(`workflow_dispatch`)では `bump` input で `major`/`minor`/`patch` を明示指定でき、その場合は上記の自動判定ルールを上書きする。既定値の `auto` を選ぶと通常どおり自動判定される。
+
 ### 規約に沿わないコミット
 
 Conventional Commits 形式としてパースできないコミットは、cocogitto によって**静的に無視される**(CHANGELOG に載らないだけでなく、バージョンにも一切影響しない)。PR時点で `.github/workflows/lint-commits.yml` の commitlint が形式を強制しているため、main にマージされた時点で規約違反のコミットが混入するリスクは低い。Merge commit で生成される GitHub 標準のマージコミット(例: `Merge pull request #12 from ...`)もこの無視対象に含まれる。
