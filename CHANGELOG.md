@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - - -
+## [v1.4.0](https://github.com/KazuProg/github-flow-test/compare/b35074427dd2c7491c83fc01cf9bdca835d56098..v1.4.0) - 2026-07-20
+#### Documentation
+- document branch protection rulesets and deploy key setup - ([b350744](https://github.com/KazuProg/github-flow-test/commit/b35074427dd2c7491c83fc01cf9bdca835d56098)) - KazuProg
+#### Continuous Integration
+- require admin approval for manual release dispatch - ([e7f651f](https://github.com/KazuProg/github-flow-test/commit/e7f651ff0bbf9bf7f5615f9ccb7566485375c2b4)) - KazuProg
+
+- - -
+
 ## [v1.3.0](https://github.com/KazuProg/github-flow-test/compare/ca220a1a32d3f4413255acd27ec09ce1b5e7fb74..v1.3.0) - 2026-07-12
 #### Documentation
 - note CHANGELOG.md dates are UTC, not JST - ([cdf02e2](https://github.com/KazuProg/github-flow-test/commit/cdf02e220d42e45c3200cc7f33bccd75d747d1c6)) - KazuProg
